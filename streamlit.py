@@ -3,8 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 
-df = pd.read_csv('transformed_data.csv')
-df.sort_values("state", inplace = True)
+df = pd.read_csv('tranformed.csv')
 
 st.title("Consumer Complaint Data")
 complaints, State = st.columns((4,1))
@@ -15,47 +14,33 @@ df = df[df["state"] == states_drop]
 
 
 
-tc = len(df)
-filter1 = df[df["company_response"]=="Closed with explanation"]
-closed_comp = len(filter1)
-filter2 = df[df["timely"]=="Yes"]
-timely_comp = len(filter2)
-filter3 = df[df["company_response"]=="In progress"]
-prog_comp = len(filter3)
+total_complaints = len(df)
+closed_filter = df[df["company_response"]=="Closed with explanation"]
+closed = len(closed_filter)
+timely_filter = df[df["timely"]=="Yes"]
+timely = len(timely_filter)
+progress_filter = df[df["company_response"]=="In progress"]
+prog = len(progress_filter)
 states = df['state'].unique()
-complaints_prod = df.groupby(['product']).size().reset_index(name='count').sort_values(by='count', ascending=True)
-print(complaints_prod)
-complaints_month = df.groupby(['date_received']).size().reset_index(name='count').sort_values(by='date_received', ascending=True)
-print(complaints_month)
-complaints_status = df.groupby(['submitted_via']).size().reset_index(name='count').sort_values(by='count', ascending=True)
-print(complaints_status)
-complaints_issue = df.groupby(['issue', 'sub_issue']).size().reset_index(name='count').sort_values(by='count', ascending=True)
-print(complaints_issue)
+month_comp = df.groupby(['date_received']).size().reset_index(name='count').sort_values(by='date_received', ascending=True)
+issue = df.groupby(['issue', 'sub_issue']).size().reset_index(name='count').sort_values(by='count', ascending=True)
 
-tc_kpi,closed_comp_kpi,timely_comp_kpi,prog_comp_kpi, state = st.columns(5)
-tc_kpi.metric(label="Total Complaints",value=tc, delta=-0.5)
-closed_comp_kpi.metric(label = "Closed Status Complaints",value=closed_comp, delta=-0.5)
-timely_comp_kpi.metric(label="Timely Responded Complaints",value=timely_comp, delta=-0.5)
-prog_comp_kpi.metric(label="Progress Status Complaints",value=prog_comp, delta=-0.5)
+total_kpi,closed_kpi,timely_kpi,prog_kpi, state = st.columns(5)
+total_kpi.metric(label="Total Complaints",value=total_complaints, delta=-0.75)
+closed_kpi.metric(label = "Closed Status Complaints",value=closed, delta=-0.75)
+timely_kpi.metric(label="Timely Responded Complaints",value=timely, delta=-0.75)
+prog_kpi.metric(label="Progress Status Complaints",value=prog, delta=-0.75)
 
-complaints_month_fig, complaints_prod_fig = st.columns(2)
-complaints_issue_fig, complaints_status_fig = st.columns(2)
+monthly_complaints, issues = st.columns(2)
 
-with complaints_month_fig:
+with monthly_complaints:
     st.subheader("Complaints by Month")
-    fig = px.line(complaints_month , x='date_received', y='count')
+    fig = px.line(month_comp , x='date_received', y='count')
     st.write(fig)
-with complaints_prod_fig:
-    st.subheader("Complaints by Product")
-    fig = px.bar(complaints_prod, x='product', y='count')
-    st.write(fig)
-with complaints_issue_fig:
+with issues:
     st.subheader("Complaints by Issue and Sub-Issue")
-    fig = px.treemap(complaints_issue, path=['issue', 'sub_issue'], values='count')
+    fig = px.treemap(issue, path=['issue', 'sub_issue'], values='count')
     st.write(fig)
-with complaints_status_fig:
-    st.subheader("Complaints by Submitted via")
-    fig = px.pie(complaints_status, values='count', names='submitted_via')
-    st.write(fig)
+
     
 
